@@ -1,0 +1,22 @@
+Line number based filter
+===========================
+	
+	Q1. Task print Nth line
+	
+	Q2. print Nth line to Mth line
+
+	Q3. print Oddline number //like even line numbers
+	
+	Q4. delete (ignore) Nth line(s)
+
+	Q5. print Nth ROW(record) Mth Column(Field)
+
+	Q6. search pattern from file --> Record/Field based filter
+	
+	Q7. filter line ends with space 
+
+	Q8. filter non-empty line
+	
+	Q9. filter multiple pattern(more than one keywords)
+
+	Q10. Filter column based 
