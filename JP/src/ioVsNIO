@@ -1,0 +1,250 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+
+
+/*
+ * 	Stream API Activity
+ * =====================
+ * 
+ * Task 1 : Create a Person class with name and age.
+ * 
+ * Task 2: Define a list crowd with Person instances.
+ * 
+ * Task 3 : Group Person By their Age  
+ * 
+ * Task 4 : write it to a file PersonByAge.txt
+ * 
+ */
+
+
+
+class Person{
+	private int age;
+	private String name;
+	public Person(int age, String name) {
+		this.age = age;
+		this.name = name;
+	}
+	public int getAge() {
+		return age;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
+}
+class Crowd{
+	public static List<Person> createCrowd() {
+		
+		List<Person> crowd = new ArrayList<>();
+		crowd.add(new Person(19,"Varun"));
+		crowd.add(new Person(29,"Emile"));
+		crowd.add(new Person(39,"Tom"));
+		crowd.add(new Person(19,"Vim"));
+		crowd.add(new Person(29,"Aakash"));
+		crowd.add(new Person(39,"Louis"));
+		crowd.add(new Person(19,"Sha"));
+		crowd.add(new Person(9,"Roy"));
+		crowd.add(new Person(19,"Gill"));
+		crowd.add(new Person(49,"Krish"));
+		
+		return crowd;
+		
+	}
+}
+public class Grouping {
+
+	public static void main(String[] args) {
+		
+		List<Person> crowd= Crowd.createCrowd();
+		
+		Map<Integer,List<Person>> mapByAge = GroupByAgeWithoutStream(crowd);
+		
+		GroupByAgeWithStream(crowd);
+		
+		IOWithoutStream(mapByAge);
+		
+		IOWithStream(mapByAge);
+		
+		NioWay(mapByAge);
+		
+	}
+		
+
+	//		Grouping People By Age  : WAY 1		( WITHOUT STREAM)
+	public static Map<Integer,List<Person>> GroupByAgeWithoutStream(List<Person> crowd) {
+	
+		Map<Integer,List<Person>> mapByAge = new HashMap<>();
+		for(Person p: crowd) {
+			if(!mapByAge.containsKey(p.getAge()))
+				mapByAge.put(p.getAge(),new ArrayList<Person>());
+			
+				mapByAge.get(p.getAge()).add(p);
+		}
+		
+		for(Integer key : mapByAge.keySet()) {
+			System.out.print(key + ":" );
+			for(Person p : mapByAge.get(key)) {
+				System.out.print(p.getName()+ " ");
+			}System.out.println();
+		}
+		
+		return mapByAge;
+	}		
+// CONSOLE OUTPUT
+		
+//		49:Krish 
+//		19:Varun Vim Sha Gill 
+//		39:Tom Louis 
+//		9:Roy 
+//		29:Emile Aakash 
+		
+	
+	
+	
+//	Grouping Employees By Age   : WAY 2      (WITH STREAM)
+	
+	public static void GroupByAgeWithStream(List<Person> crowd) {			
+		Map<Integer,List<Person>> personByAge = crowd
+				.stream()
+				.collect(Collectors.groupingBy(p->p.getAge()));
+		
+		 personByAge
+		.forEach((age,p)
+				-> System.out.println(age + " : " + p.stream()
+					.map(x->x.getName())
+					.collect(Collectors.toList())));
+		 
+	} 
+//CONSOLE OUTPUT
+		 
+// 49 : [Krish]
+// 19 : [Varun, Vim, Sha, Gill]
+// 39 : [Tom, Louis]
+// 9 : [Roy]
+// 29 : [Emile, Aakash]
+
+	
+	
+	
+		 
+// io way		 -  without stream()
+	public static void IOWithoutStream(Map<Integer,List<Person>> personByAge) {		
+		try (BufferedWriter out= new BufferedWriter(new FileWriter(new File("C:\\Users\\Karthik\\Desktop\\PersonByAge1A.txt"),true))){
+		
+			List<String> FileEntry = new ArrayList<>();
+			
+			for(Integer e: personByAge.keySet()) {
+			
+				List<Person> listEntries = personByAge.get(e);
+				Iterator<Person> iter = listEntries.listIterator();
+				while(iter.hasNext())
+					FileEntry.add(e+ ":" + iter.next().getName());
+			}
+			
+			for(String line : FileEntry)
+			out.write(line+"\n");
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	 
+//		Data After File Operation
+//		
+//		File : PersonByAge1A.txt 
+//      ========================
+//		 49:Krish
+//		 19:Varun
+//		 19:Vim
+//		 19:Sha
+//		 19:Gill
+//		 39:Tom
+//		 39:Louis
+//		 9:Roy
+//		 29:Emile
+//		 29:Aakash 
+//		
+		
+// io way		 (with stream)
+	public static void IOWithStream(Map<Integer,List<Person>> personByAge) {	
+				try (BufferedWriter out= new BufferedWriter(new FileWriter(new File("C:\\Users\\Karthik\\Desktop\\PersonByAge1B.txt"),true))){
+					List<String> lines = new ArrayList<>();
+					
+					
+					personByAge.forEach((k,v)-> lines.add(k
+							+":"
+							+v.stream().map(x->x.getName()).collect(Collectors.toSet())
+							));
+					Iterator<String> iter  = lines.listIterator();
+					while(iter.hasNext())
+						out.write(iter.next()+"\n");
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	}		
+//	Data After File Operation
+//		
+//	File : PersonByAge1B.txt 
+//	========================					
+//	49:[Krish]
+//	19:[Gill, Varun, Vim, Sha]
+//	39:[Tom, Louis]
+//	9:[Roy]
+//	29:[Emile, Aakash]
+		
+	
+	
+	
+	
+// nio way
+	public static void NioWay(Map<Integer,List<Person>> personByAge) {	
+		try {
+			Files.write(Paths.get("C:\\Users\\Karthik\\Desktop\\PersonByAge2.txt")
+					, () -> personByAge.entrySet().stream()
+				    .<CharSequence>map(e -> e.getKey() + " : " 
+			+ e.getValue().stream().map(x->x.getName()).collect(Collectors.toList()))
+				    .iterator());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+
+	}
+	
+//	Data After File Operation
+//	
+//File : PersonByAge2.txt 
+//========================	
+// 49 : [Krish]
+// 19 : [Varun, Vim, Sha, Gill]
+// 39 : [Tom, Louis]
+// 9 : [Roy]
+// 29 : [Emile, Aakash]
+
+
+}
